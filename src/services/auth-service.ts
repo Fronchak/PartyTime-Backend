@@ -8,8 +8,8 @@ import LoginInputDTO from '../dtos/auth/login-input-dto';
 import ValidationError from '../errors/validation-error';
 import FieldError from '../errors/field-error';
 import UpdateInputDTO from '../dtos/auth/update-input-dto';
-import UserOutputDTO from '../dtos/user/user-output-dto';
 import userService from './user-service';
+import UserUpdateOutputDTO from '../dtos/user/user-update-output-dto';
 
 class AuthService {
 
@@ -30,15 +30,17 @@ class AuthService {
         return tokenService.makeToken(registerInputDTO.email, user._id.toString());
     }
 
-    public async update(updateInputDTO: UpdateInputDTO, username: string): Promise<UserOutputDTO> {
+    public async update(updateInputDTO: UpdateInputDTO, username: string): Promise<UserUpdateOutputDTO> {
         const user = await userService.getUserByEmail(username);
         user.name = updateInputDTO.name;
         user.email = updateInputDTO.email;
         await user.save();
+        const tokenOutputDTO = tokenService.makeToken(user.email, user._id.toString());
         return {
             id: user._id.toString(),
             email: user.email,
-            name: user.name
+            name: user.name,
+            access_token: tokenOutputDTO.access_token
         }
     }
 
